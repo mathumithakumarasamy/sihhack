@@ -3,171 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance - SterilEase Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="script.js" defer></script>
+    <title>SteriLease Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00796b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        table th {
+            background-color: #004d40;
+            color: #ffffff;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+
+        .section-title {
+            color: #004d40;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        .issue {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .resolved {
+            color: #388e3c;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>SteriLease Maintenance</h1>
+        
+        <h2 class="section-title">BLDC Motor Issues</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="motorTable">
+                <!-- Data will be dynamically inserted here -->
+            </tbody>
+        </table>
 
-    <!-- Navigation Bar -->
-    <div class="navbar">
-      <h1>Maintainance</h1>
+        <h2 class="section-title">Valve Issues</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="valveTable">
+                <!-- Data will be dynamically inserted here -->
+            </tbody>
+        </table>
+
+        <h2 class="section-title">Sensor Issues</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="sensorTable">
+                <!-- Data will be dynamically inserted here -->
+            </tbody>
+        </table>
     </div>
 
-    <!-- Main Content -->
-    <main>
-        <div class="maintenance-section">
-            <div class="maintenance-item" onclick="showMaintenanceAlert('BLDC Motor')">
-                <h2>BLDC Motor Maintenance</h2>
-                <p>Regular maintenance of BLDC (Brushless DC) motors is essential to ensure proper functionality.</p>
-                <ul>
-                    <li>Check bearings and lubrication</li>
-                    <li>Inspect electrical connections</li>
-                    <li>Test motor performance</li>
-                </ul>
-                <img src="bldc_motor.jpg" alt="BLDC Motor" class="maintenance-image">
-            </div>
+    <!-- Firebase SDK v11 -->
+    <script type="module">
+        // Import the necessary Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-            <div class="maintenance-item" onclick="showMaintenanceAlert('Vacuum Pump')">
-                <h2>Vacuum Pump Maintenance</h2>
-                <p>Ensure the vacuum pump is in optimal condition by performing routine checks.</p>
-                <ul>
-                    <li>Inspect seals and gaskets</li>
-                    <li>Test suction performance</li>
-                    <li>Check fluid levels</li>
-                </ul>
-                <img src="vacuum_pump.jpg" alt="Vacuum Pump" class="maintenance-image">
-            </div>
-        </div>
-    </main>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnU69sqRHEC9xDj7sQkyBH_sOG3AOhF24",
+            authDomain: "sterilease-b1185.firebaseapp.com",
+            databaseURL: "https://sterilease-b1185-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sterilease-b1185",
+            storageBucket: "sterilease-b1185.firebasestorage.app",
+            messagingSenderId: "287619655835",
+            appId: "1:287619655835:web:5f188535e492ebc3f33e3e"
+        };
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 SterilEase Dashboard | All rights reserved</p>
-    </footer>
-<script>
-    // JavaScript for Maintenance Page (script.js)
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
 
-// Function to show an alert when a user clicks on a maintenance item
-function showMaintenanceAlert(item) {
-    alert("You clicked on the " + item + " maintenance section. Make sure to follow all the guidelines!");
-}
+        // Get a reference to the database
+        const db = getDatabase(app);
 
-// Function to add more details (expandable section)
-function showMoreDetails(item) {
-    let details = document.getElementById(item + '-details');
-    if (details.style.display === 'none') {
-        details.style.display = 'block';
-    } else {
-        details.style.display = 'none';
-    }
-}
+        // Get references to the table bodies where data will be inserted
+        const motorTable = document.getElementById("motorTable");
+        const valveTable = document.getElementById("valveTable");
+        const sensorTable = document.getElementById("sensorTable");
 
-</script>
-<style>
-    /* General Styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
-}
+        // Reference to the maintenance data in the database
+        const maintenanceRef = ref(db, 'maintenanceData');
 
-/* Header Navigation */
-.navbar {
-    background-color: #2c3e50;
-    padding: 15px 0;
-    text-align: center;
-}
+        // Sample Data (5 entries)
+        const sampleData = [
+            { timestamp: 1678905600, motor_status: '1', valve_status: '0', sensor_status: '1' },
+            { timestamp: 1678909200, motor_status: '0', valve_status: '1', sensor_status: '0' },
+            { timestamp: 1678912800, motor_status: '1', valve_status: '1', sensor_status: '1' },
+            { timestamp: 1678916400, motor_status: '0', valve_status: '0', sensor_status: '1' },
+            { timestamp: 1678920000, motor_status: '1', valve_status: '0', sensor_status: '0' }
+        ];
 
-.navbar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
+        // Loop through the sample data to simulate real-time database updates
+        sampleData.forEach(data => {
+            const timestamp = new Date(data.timestamp * 1000);  // Convert to date
+            const date = timestamp.toLocaleDateString();
+            const time = timestamp.toLocaleTimeString();
 
-.navbar ul li {
-    display: inline;
-    margin: 0 15px;
-}
+            // Motor, Valve, and Sensor status
+            const motorStatus = data.motor_status;
+            const valveStatus = data.valve_status;
+            const sensorStatus = data.sensor_status;
 
-.navbar ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 18px;
-}
+            // Add rows dynamically to motor table
+            motorTable.innerHTML += `
+                <tr>
+                    <td>${date}</td>
+                    <td>${time}</td>
+                    <td class="${motorStatus === '1' ? 'issue' : 'resolved'}">
+                        ${motorStatus === '1' ? 'Problem Detected' : 'Resolved'}
+                    </td>
+                </tr>
+            `;
 
-/* Main Content */
-main {
-    padding: 40px;
-    background-color: white;
-    border: 3px solid #003366; /* Dark Blue Border */
-    border-radius: 10px;
-    max-width: 1000px;
-    margin: 40px auto;
-}
+            // Add rows dynamically to valve table
+            valveTable.innerHTML += `
+                <tr>
+                    <td>${date}</td>
+                    <td>${time}</td>
+                    <td class="${valveStatus === '1' ? 'issue' : 'resolved'}">
+                        ${valveStatus === '1' ? 'Problem Detected' : 'Resolved'}
+                    </td>
+                </tr>
+            `;
 
-/* Maintenance Section */
-.maintenance-section {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-/* Maintenance Item */
-.maintenance-item {
-    margin-bottom: 40px;
-    padding: 20px;
-    border: 2px solid #003366; /* Dark Blue Border for each item */
-    border-radius: 8px;
-    background-color: #f9f9f9; /* Light background for items */
-    cursor: pointer; /* Makes it clear the items are clickable */
-}
-
-.maintenance-item h2 {
-    color: #3498db;
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-.maintenance-item p {
-    font-size: 16px;
-    line-height: 1.6;
-}
-
-.maintenance-item ul {
-    list-style-type: square;
-    margin-left: 20px;
-}
-
-.maintenance-image {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin-top: 15px;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 20px;
-    background-color: #2c3e50;
-    color: white;
-}
-
-/* Media Queries for Responsive Design */
-@media screen and (max-width: 768px) {
-    .navbar ul li {
-        display: block;
-        margin: 10px 0;
-    }
-
-    .maintenance-item {
-        margin-bottom: 30px;
-    }
-}
-
-</style>
+            // Add rows dynamically to sensor table
+            sensorTable.innerHTML += `
+                <tr>
+                    <td>${date}</td>
+                    <td>${time}</td>
+                    <td class="${sensorStatus === '1' ? 'issue' : 'resolved'}">
+                        ${sensorStatus === '1' ? 'Problem Detected' : 'Resolved'}
+                    </td>
+                </tr>
+            `;
+        });
+    </script>
 </body>
 </html>
